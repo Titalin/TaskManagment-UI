@@ -1,0 +1,126 @@
+<div class="kanban-wrapper">
+  <h1 class="main-title">Tablero Kanban - Gestión de Tareas</h1>
+
+  <div class="header-actions">
+    <button class="main-button" type="button" (click)="openDialog()">
+      Crear nueva tarea
+    </button>
+  </div>
+
+  <div *ngIf="notificationMessage" class="notification" [class.success]="notificationType === 'success'" [class.error]="notificationType === 'error'">
+    {{ notificationMessage }}
+  </div>
+
+  <div class="dialog-backdrop" *ngIf="showDialog">
+    <div class="dialog-panel">
+      <div class="dialog-header">
+        <div class="dialog-heading">
+          <mat-icon>task_alt</mat-icon>
+          <div>
+            <h2>Crear nueva tarea</h2>
+            <p>Agrega un título y una descripción clara para seguirla luego.</p>
+          </div>
+        </div>
+      </div>
+
+      <form class="dialog-form" (ngSubmit)="addTask()">
+        <div class="form-group">
+          <label for="taskTitle">Título</label>
+          <input
+            id="taskTitle"
+            name="taskTitle"
+            type="text"
+            [(ngModel)]="newTaskTitle"
+            placeholder="Ej. Preparar demo"
+            maxlength="120"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="taskDescription">Descripción</label>
+          <textarea
+            id="taskDescription"
+            name="taskDescription"
+            rows="4"
+            [(ngModel)]="newTaskDescription"
+            placeholder="Ej. Crear tarjetas y agregar backend"
+            maxlength="500"
+            required
+          ></textarea>
+        </div>
+
+        <div class="dialog-error" *ngIf="dialogError">{{ dialogError }}</div>
+
+        <div class="dialog-actions">
+          <button type="button" class="cancel-button" (click)="closeDialog()">Cancelar</button>
+          <button type="submit" class="confirm-button" [disabled]="!newTaskTitle.trim() || !newTaskDescription.trim()">Agregar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="kanban-container" cdkDropListGroup>
+    <div class="column">
+      <div class="column-header todo">
+        <mat-icon>assignment</mat-icon>
+        <h2>Pendientes</h2>
+      </div>
+
+      <div
+        cdkDropList
+        #todoList="cdkDropList"
+        [cdkDropListData]="todo"
+        [cdkDropListConnectedTo]="[doneList]"
+        class="list-container"
+        (cdkDropListDropped)="drop($event)">
+       
+        @for (item of todo; track item.id) {
+          <mat-card cdkDrag class="task-card">
+            <mat-card-header>
+              <mat-card-title>{{item.title}}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p>{{item.description}}</p>
+            </mat-card-content>
+            <div class="card-footer">
+              <small>Creado: {{item.createdAt | date:'shortDate'}}</small>
+            </div>
+            <div class="custom-placeholder" *cdkDragPlaceholder></div>
+          </mat-card>
+        } @empty {
+          <div class="empty-label">No hay tareas pendientes</div>
+        }
+      </div>
+    </div>
+
+    <div class="column">
+      <div class="column-header done">
+        <mat-icon>check_circle</mat-icon>
+        <h2>Completadas</h2>
+      </div>
+
+      <div
+        cdkDropList
+        #doneList="cdkDropList"
+        [cdkDropListData]="done"
+        [cdkDropListConnectedTo]="[todoList]"
+        class="list-container"
+        (cdkDropListDropped)="drop($event)">
+       
+        @for (item of done; track item.id) {
+          <mat-card cdkDrag class="task-card completed">
+            <mat-card-header>
+              <mat-card-title>{{item.title}}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p>{{item.description}}</p>
+            </mat-card-content>
+          </mat-card>
+        } @empty {
+          <div class="empty-label">Arrastra aquí para completar</div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
